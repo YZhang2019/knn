@@ -23,7 +23,7 @@ def featureScaling(dataSet):
     dataSet = dataSet/maxData
     return dataSet
 
-# include three different distance matrix
+# This knn classifier includes three different distance matrix
 def knn(testData, trainDataSet, trainLabel):
     trainSize = trainDataSet.shape[0]
     tileTestData = np.tile(testData, (trainSize,1))
@@ -124,6 +124,6 @@ print("")
 print("------Manhattan Distance Model------------") 
 print("Confusion Matrix:")
 print(confusionMat3)
-print("accurancy is: %.2f%%" %(100*(testSize-errorCount3)/float(testSize)))
+print("The accurancy is: %.2f%%" %(100*(testSize-errorCount3)/float(testSize)))
 print("Total runtime is ",time.perf_counter()-start1)
 print("Actual wall time is ",end2-start2)
