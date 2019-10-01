@@ -3,7 +3,7 @@ import operator
 import time
 import numpy as np
 
-def loadData():
+def loadDataSet():
     trainList = []
     with open('diabetes.csv') as datafile:
         lines = csv.reader(datafile)
@@ -18,16 +18,16 @@ def loadData():
                 data[i,j] = float(trainList[i,j])
     return data
 
-def featureScaling(dataSet):
+def featureSetScaling(dataSet):
     maxData = dataSet.max(0)
     dataSet = dataSet/maxData
     return dataSet
 
-# This knn classifier includes three different distance matrix
+# This knn algorithm includes three different distance matrix
 def knn(testData, trainDataSet, trainLabel):
     trainSize = trainDataSet.shape[0]
     tileTestData = np.tile(testData, (trainSize,1))
-    # 1 : Euclidean Distance Model
+    #Euclidean Distance Model
     diffMat1 = tileTestData - trainDataSet
     sqDiffMat = np.array(diffMat1)**2
     sqDistances = sqDiffMat.sum(axis=1)
@@ -35,7 +35,7 @@ def knn(testData, trainDataSet, trainLabel):
     sortedDistIndex1 = distances1.argsort()
     countLabel1 = {}
     
-    # 2 : Cosine Distance Model
+    #Cosine Distance Model
     diffMat2 = np.multiply(tileTestData, trainDataSet)
     prodSum = diffMat2.sum(axis=1)
     testSq = np.array(testData)**2
@@ -49,7 +49,7 @@ def knn(testData, trainDataSet, trainLabel):
     sortedDistIndex2 = distances2[0].argsort()
     countLabel2 = {}
 
-    # 3 : Manhattan Distance Model
+    #Manhattan Distance Model
     distances3 = tileTestData - trainDataSet
     distances3 = np.fabs(distances3)
     distances3 = distances3.sum(axis=1)
@@ -74,56 +74,55 @@ def knn(testData, trainDataSet, trainLabel):
     return res
 
 
-# ------loading data----------
+# Loading data and set up time counter here
 start1 = time.perf_counter()
-trainData = loadData()
+trainData = loadDataSet()
 size,num = trainData.shape
-testData = featureScaling(trainData[int(size*0.8):,:(num-2)])
+testData = featureSetScaling(trainData[int(size*0.8):,:(num-2)])
 testLabel = trainData[int(size*0.8):,num-1]
 trainLabel = trainData[:int(size*0.8),num-1]
-trainData = featureScaling(trainData[:int(size*0.8),:(num-2)])
-# ----------------------------
+trainData = featureSetScaling(trainData[:int(size*0.8),:(num-2)])
 
 
-k = 5
+k = 4
 testSize = testData.shape[0]
-# 1 : Euclidean Distance Model
-# 2 : Cosine Distance Model
-# 3 : Manhattan Distance Model
-errorCount1 = 0
-errorCount2 = 0
-errorCount3 = 0
-confusionMat1 = np.zeros((2,2))
-confusionMat2 = np.zeros((2,2))
-confusionMat3 = np.zeros((2,2))
+# Euclidean Distance Model
+# Cosine Distance Model
+# Manhattan Distance Model
+errorCount_ED = 0
+errorCount_CD = 0
+errorCount_MD = 0
+confusionMatix_ED = np.zeros((2,2))
+confusionMatix_CD = np.zeros((2,2))
+confusionMatix_MD = np.zeros((2,2))
 start2 = time.perf_counter()
 for i in range(testSize):
     curRes = knn(testData[i], trainData, trainLabel)
     trueRes = int(testLabel[i])
     if(curRes[0] != trueRes):
-        errorCount1 += 1
+        errorCount_ED += 1
     if(curRes[1] != trueRes):
-        errorCount2 += 1
+        errorCount_CD += 1
     if(curRes[2] != trueRes):
-        errorCount3 += 1
-    confusionMat1[curRes[0],trueRes] += 1
-    confusionMat2[curRes[1],trueRes] += 1
-    confusionMat3[curRes[2],trueRes] += 1
+        errorCount_MD += 1
+    confusionMatix_ED[curRes[0],trueRes] += 1
+    confusionMatix_CD[curRes[1],trueRes] += 1
+    confusionMatix_MD[curRes[2],trueRes] += 1
 end2 = time.perf_counter()
 print("")
-print("------Euclidean Distance Model------------") 
+print("Euclidean Distance Model") 
 print("Confusion Matrix:")
-print(confusionMat1)
-print("accurancy is: %.2f%%" %(100*(testSize-errorCount1)/float(testSize)))
+print(confusionMatix_ED)
+print("accurancy is: %.2f%%" %(100*(testSize-errorCount_ED)/float(testSize)))
 print("")
-print("------Cosine Distance Model------------") 
+print("Cosine Distance Model") 
 print("Confusion Matrix:")
-print(confusionMat2)
-print("accurancy is: %.2f%%" %(100*(testSize-errorCount2)/float(testSize)))
+print(confusionMatix_CD )
+print("accurancy is: %.2f%%" %(100*(testSize-errorCount_CD)/float(testSize)))
 print("")
-print("------Manhattan Distance Model------------") 
+print("Manhattan Distance Model")
 print("Confusion Matrix:")
-print(confusionMat3)
-print("The accurancy is: %.2f%%" %(100*(testSize-errorCount3)/float(testSize)))
+print(confusionMatix_MD)
+print("accurancy is: %.2f%%" %(100*(testSize-errorCount_MD)/float(testSize)))
 print("Total runtime is ",time.perf_counter()-start1)
 print("Actual wall time is ",end2-start2)
